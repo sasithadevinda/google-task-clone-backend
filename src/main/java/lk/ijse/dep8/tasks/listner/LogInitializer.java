@@ -25,19 +25,21 @@ public class LogInitializer implements ServletContextListener {
 
     private final Logger logger = Logger.getLogger(LogInitializer.class.getName());
     private FileHandler fileHandler;
+    private ScheduledExecutorService executor;
+
+    @Override
+    public void contextDestroyed(ServletContextEvent sce) {
+        executor.shutdownNow();
+    }
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
+
         Logger.getLogger("lk.ijse.dep8.tasks").addHandler(new ConsoleHandler());
 
         try {
             final Properties prop = new Properties();
             prop.load(this.getClass().getResourceAsStream("/application.properties"));
-
-            //app.profiles.active=dev
-            //app.logging.path=/opt/apache/apache-tomcat-9.0.62/logs/
-
-
 
             String profile = (String) prop.getOrDefault("app.profiles.active", "dev");
             String logDir = (String) prop.getOrDefault("app.logging.path", "/var/log");
@@ -48,14 +50,11 @@ public class LogInitializer implements ServletContextListener {
             }
 
             System.setProperty("app.profiles.active", profile);
+
             if (profile.equals("dev")) {
                 Logger.getLogger("lk.ijse.dep8.tasks").setLevel(Level.FINE);
-                //////////file hieracy eka ??????
-
             } else {
                 Logger.getLogger("lk.ijse.dep8.tasks").setLevel(Level.INFO);
-                //////////file hieracy eka ??????
-
             }
 
             Path logDirPath = Paths.get(logDir);
@@ -70,13 +69,11 @@ public class LogInitializer implements ServletContextListener {
             final String path = logDirPath.toAbsolutePath().toString();
             installFileHandler(getPath(path));
             Logger.getLogger("lk.ijse.dep8.tasks").setUseParentHandlers(false);
-            /////////???????????????
 
-            ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+            executor = Executors.newSingleThreadScheduledExecutor();
             executor.scheduleWithFixedDelay(() -> installFileHandler(getPath(path)),
                     Duration.between(LocalTime.now(), LocalTime.MIDNIGHT).toMillis(),
                     60 * 60 * 1000 * 24, TimeUnit.MILLISECONDS);
-
 
         } catch (IOException e) {
             logger.log(Level.SEVERE, e.getMessage(), e);
@@ -96,7 +93,6 @@ public class LogInitializer implements ServletContextListener {
         try {
             fileHandler = new FileHandler(path,2 * 1024 * 1024, 20,true);
             fileHandler.setFormatter(fileHandler.getFormatter());
-            /////????????????
             fileHandler.setLevel(Logger.getLogger("lk.ijse.dep8.tasks").getLevel());
             Logger.getLogger("lk.ijse.dep8.tasks").addHandler(fileHandler);
         } catch (IOException e) {

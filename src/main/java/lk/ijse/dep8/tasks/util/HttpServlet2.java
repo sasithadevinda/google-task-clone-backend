@@ -1,9 +1,7 @@
 package lk.ijse.dep8.tasks.util;
 
-import com.sun.deploy.net.HttpRequest;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
-
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -17,45 +15,52 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class HttpServlet2 extends HttpServlet {
-    private Logger logger =Logger.getLogger(HttpServlet2.class.getName());
+
+    private final Logger logger = Logger.getLogger(HttpServlet2.class.getName());
+
+    protected  void doPatch(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{
+
+    }
+
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        try{
-            super.service(req,resp);
-    }catch (Throwable t){
-            logger.severe("BAD");
-            logger.logp(Level.SEVERE,t.getStackTrace()[0].getClassName(),t.getStackTrace()[0].getMethodName(),t.getMessage(),t);
+        try {
+            if (req.getMethod().equals("PATCH")){
+                doPatch(req, resp);
+            }else{
+                super.service(req, resp);
+            }
+        } catch (Throwable t) {
+
+            if (!(t instanceof ResponseStatusException &&
+                    (((ResponseStatusException)t).getStatus() >= 400 &&
+                    ((ResponseStatusException)t).getStatus() < 500))){
+                logger.logp(Level.SEVERE, t.getStackTrace()[0].getClassName(),
+                        t.getStackTrace()[0].getMethodName(), t.getMessage(), t);
+            }
 
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             t.printStackTrace(pw);
+
             resp.setContentType("application/json");
 
-            /////////////////
-
-
-
-
-            //////////////////
-
-
-            HttpResponseErrorMassage errorMassage =null;
+            HttpResponseErrorMsg errorMsg;
             if (t instanceof ResponseStatusException){
-                ResponseStatusException res = (ResponseStatusException) t;
-                resp.setStatus(res.getStatus());
-                errorMassage = new HttpResponseErrorMassage(new Date().getTime(),
-                        res.getStatus(),
+                ResponseStatusException rse = (ResponseStatusException) t;
+                resp.setStatus(rse.getStatus());
+                errorMsg = new HttpResponseErrorMsg(new Date().getTime(),
+                        rse.getStatus(),
                         sw.toString(), t.getMessage(), req.getRequestURI());
             }else{
-                errorMassage = new HttpResponseErrorMassage(new Date().getTime(),
+                resp.setStatus(500);
+                errorMsg = new HttpResponseErrorMsg(new Date().getTime(),
                         500,
                         sw.toString(), t.getMessage(), req.getRequestURI());
             }
 
-
             Jsonb jsonb = JsonbBuilder.create();
-            jsonb.toJson(errorMassage, resp.getWriter());
-
+            jsonb.toJson(errorMsg, resp.getWriter());
         }
     }
 }

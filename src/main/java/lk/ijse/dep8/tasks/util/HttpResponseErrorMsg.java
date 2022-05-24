@@ -4,23 +4,21 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.Serializable;
 import java.util.Arrays;
 
-public class HttpResponseErrorMassage implements Serializable {
+public class HttpResponseErrorMsg implements Serializable {
     private long timestamp;
     private int status;
-
     private String exception;
-    private String massage;
+    private String message;
     private String path;
 
-    public HttpResponseErrorMassage() {
+    public HttpResponseErrorMsg() {
     }
 
-    public HttpResponseErrorMassage(long timestamp, int status, String exception, String massage, String path) {
+    public HttpResponseErrorMsg(long timestamp, int status, String exception, String message, String path) {
         this.timestamp = timestamp;
         this.status = status;
-
         this.exception = exception;
-        this.massage = massage;
+        this.message = message;
         this.path = path;
     }
 
@@ -39,10 +37,8 @@ public class HttpResponseErrorMassage implements Serializable {
     public void setStatus(int status) {
         this.status = status;
     }
+
     public String getError() {
-
-
-
         return Arrays.asList(HttpServletResponse.class.getDeclaredFields())
                 .stream().filter(field -> {
                     try {
@@ -54,21 +50,21 @@ public class HttpResponseErrorMassage implements Serializable {
                         .replace("_", " ")).orElse("Internal Server Error");
     }
 
-
     public String getException() {
-        return System.getProperty("app.profiles.active").equals("dev") ? exception:null;
+        return System.getProperty("app.profiles.active").equals("dev") ?
+                exception : null;
     }
 
     public void setException(String exception) {
         this.exception = exception;
     }
 
-    public String getMassage() {
-        return massage;
+    public String getMessage() {
+        return message;
     }
 
-    public void setMassage(String massage) {
-        this.massage = massage;
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     public String getPath() {
@@ -79,5 +75,14 @@ public class HttpResponseErrorMassage implements Serializable {
         this.path = path;
     }
 
-
+    @Override
+    public String toString() {
+        return "HttpResponseErrorMsg{" +
+                "timestamp=" + timestamp +
+                ", status=" + status +
+                ", exception='" + exception + '\'' +
+                ", message='" + message + '\'' +
+                ", path='" + path + '\'' +
+                '}';
+    }
 }
