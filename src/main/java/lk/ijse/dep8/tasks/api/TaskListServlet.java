@@ -78,8 +78,6 @@ public class TaskListServlet extends HttpServlet2 {
             rst.next();
             taskList.setId(rst.getInt(1));
 
-
-
             resp.setContentType("application/json");
             resp.setStatus(HttpServletResponse.SC_CREATED);
             jsonb.toJson(taskList, resp.getWriter());
@@ -105,7 +103,6 @@ public class TaskListServlet extends HttpServlet2 {
 
         try (Connection connection = pool.get().getConnection()) {
             PreparedStatement stm = connection.
-
                     prepareStatement("SELECT * FROM task_list t WHERE t.id=? AND t.user_id=?");
             stm.setInt(1, taskListId);
             stm.setString(2, userId);

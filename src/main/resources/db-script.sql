@@ -1,4 +1,4 @@
-CREATE TABLE user
+CREATE TABLE IF NOT EXISTS user
 (
     id          CHAR(36) PRIMARY KEY,
     email       VARCHAR(100) UNIQUE NOT NULL,
@@ -7,32 +7,32 @@ CREATE TABLE user
     profile_pic VARCHAR(500)
 );
 
-CREATE TABLE task_list
+CREATE TABLE IF NOT EXISTS task_list
 (
     id      INT AUTO_INCREMENT PRIMARY KEY,
     name    VARCHAR(200) NOT NULL,
     user_id CHAR(36)     NOT NULL,
-    CONSTRAINT FOREIGN KEY (user_id) REFERENCES user (id)
+    CONSTRAINT FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE
 );
 
-CREATE TABLE task
+CREATE TABLE IF NOT EXISTS task
 (
     id           INT AUTO_INCREMENT PRIMARY KEY,
     title        VARCHAR(200)                      NOT NULL,
     details      VARCHAR(500),
     position     INT                                        DEFAULT 0,
-    status       ENUM ('COMPLETED', 'needsAction') NOT NULL DEFAULT 'needsAction',
+    status       ENUM ('completed', 'needsAction') NOT NULL DEFAULT 'needsAction',
     task_list_id INT                               NOT NULL,
-    CONSTRAINT FOREIGN KEY fk_task (task_list_id) REFERENCES task_list (id)
+    CONSTRAINT FOREIGN KEY (task_list_id) REFERENCES task_list (id) ON DELETE CASCADE
 );
 
-CREATE TABLE sub_task
+CREATE TABLE IF NOT EXISTS sub_task
 (
     id       INT AUTO_INCREMENT PRIMARY KEY,
     title    VARCHAR(200)                      NOT NULL,
     details  VARCHAR(500),
     position INT                                        DEFAULT 0,
-    status   ENUM ('COMPLETED', 'needsAction') NOT NULL DEFAULT 'needsAction',
+    status   ENUM ('completed', 'needsAction') NOT NULL DEFAULT 'needsAction',
     task_id  INT                               NOT NULL,
-    CONSTRAINT FOREIGN KEY fk_task (task_id) REFERENCES task_list (id)
+    CONSTRAINT FOREIGN KEY (task_id) REFERENCES task (id) ON DELETE CASCADE
 );
