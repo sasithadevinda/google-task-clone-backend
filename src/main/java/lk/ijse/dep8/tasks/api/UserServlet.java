@@ -207,13 +207,9 @@ public class UserServlet extends HttpServlet2 {
 
             connection.setAutoCommit(false);
 
-           PreparedStatement stm = connection.
-                    prepareStatement("INSERT INTO user (id, email, password, full_name, profile_pic) VALUES (?, ?, ?, ?, ?)");
+
             String id = UUID.randomUUID().toString();
-            stm.setString(1, id);
-            stm.setString(2, email);
-            stm.setString(3, DigestUtils.sha256Hex(password));
-            stm.setString(4, name);
+
 
             String pictureUrl = null;
             if (picture != null) {
@@ -221,11 +217,9 @@ public class UserServlet extends HttpServlet2 {
                         + request.getServerPort() + request.getContextPath();
                 pictureUrl += "/uploads/" + id;
             }
-            stm.setString(5, pictureUrl);
 
-            if (stm.executeUpdate() != 1) {
-                throw new SQLException("Failed to register the user");
-            }
+
+
 
             if (picture != null) {
                 String appLocation = getServletContext().getRealPath("/");
